@@ -1,0 +1,10 @@
+.pytest_cache/*
+.cache/*
+.idea/*
+datasets/*
+!datasets/.gitkeep
+
+dist/*
+!dist/.gitkeep
+
+docs/.vuepress/dist/*

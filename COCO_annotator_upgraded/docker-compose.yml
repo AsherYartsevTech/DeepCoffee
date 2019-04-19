@@ -1,0 +1,58 @@
+version: '2'
+volumes:
+    mongodb_data:
+        external: false
+networks:
+    cocoannotator:
+        external: false
+
+services:
+    frontend:
+        container_name: annotator_client2
+        build:
+            context: .
+            dockerfile: ./docker/client/Dockerfile
+        ports:
+            - '8080:8080'
+        volumes:
+            - './client:/workspace/client'
+        command: 'npm run serve'
+        networks:
+            - cocoannotator
+        depends_on:
+            - flask
+        mem_limit: 1000000000
+    flask:
+        container_name: annotator_flask2
+        build:
+            context: .
+            dockerfile: ./docker/api/Dockerfile
+        ports:
+            - '5000:5000'
+        volumes:
+            - './datasets:/datasets'
+            - './app:/workspace/app'
+            - './.git:/workspace/.git'
+        environment:
+          - FLASK_APP=app
+          - FLASK_ENV=development
+        command: 'flask run --host=0.0.0.0'
+        networks:
+            - cocoannotator
+        depends_on:
+            - database
+        mem_limit: 1000000000
+    database:
+        image: mongo:latest
+        container_name: annotator_mongodb2
+        environment:
+            - MONGO_DATA_DIR=/data/db
+            - MONGO_LOG_DIR=/dev/null
+        volumes:
+            - 'mongodb_data:/data/db'
+        ports:
+            - '27017:27017'
+        mem_limit: 1000000000
+        command: 'mongod --smallfiles --logpath=/dev/null'
+        networks:
+            - cocoannotator
